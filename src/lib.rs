@@ -6,7 +6,7 @@ pub mod take_args {
         path: String,
     }
     pub fn get_path() -> String {
-        let args = Args.parse();
+        let args = Args::parse();
         args.path
     }
 }
@@ -26,15 +26,14 @@ pub mod playing_sound {
 
     use std::time::Duration;
     use rodio::Sink;
-    use rodio::source::SineWave;
 
     pub fn play_sound_sink() {
-        let file_path: String =
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let file_path: String = super::take_args::get_path();
+        let file = File::open(file_path).unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
-        let source = SineWave::new(440.0).take_duration(Duration::from_secs_f32(0.25)).amplify(0.20);
+        let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
         sink.append(source);
         sink.sleep_until_end();
     }
 }
-
-fn main() {}
