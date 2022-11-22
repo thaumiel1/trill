@@ -27,10 +27,15 @@ pub mod playing_sound {
     }
 
     fn extract_configuration() -> Configuration {
+
         let volume = option_env!("VOLUME")
             .unwrap()
             .parse::<f32>()
             .unwrap_or(1.0);
+
+        let volume = option_env!("VOLUME").and_then(|arg| arg.parse::<f32>()).unwrap_or(1.0)
+
+
 
         Configuration {
             volume,
