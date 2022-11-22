@@ -21,22 +21,17 @@ pub mod playing_sound {
     use std::fs::File;
     use std::io::BufReader;
     use rodio::{Decoder, OutputStream, Sink, source::Source};
+    use std::env::var;
 
     struct Configuration {
         volume: f32,
     }
 
     fn extract_configuration() -> Configuration {
-
-        let volume = option_env!("VOLUME")
-            .unwrap()
-            .parse::<f32>()
+        let volume = var("VOLUME")
+            .ok()
+            .and_then(|v| v.parse().ok())
             .unwrap_or(1.0);
-
-        let volume = option_env!("VOLUME").and_then(|arg| arg.parse::<f32>()).unwrap_or(1.0)
-
-
-
         Configuration {
             volume,
         }
