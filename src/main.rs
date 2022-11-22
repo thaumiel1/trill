@@ -1,3 +1,5 @@
+mod lib;
+
 fn main() {
-    println!("Hello, world!");
+    lib::playing_sound::play_sound_sink();
 }
