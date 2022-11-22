@@ -14,19 +14,39 @@ pub mod take_args {
     }
 }
 
-// TODO: Accept environment variables as options for volume control, amplification, etc.
+// TODO: Accept environment variables as options for volume control.
 
 pub mod playing_sound {
+
     use std::fs::File;
     use std::io::BufReader;
     use rodio::{Decoder, OutputStream, Sink, source::Source};
+    use std::env::var;
+
+    struct Configuration {
+        volume: f32,
+    }
+
+    fn extract_configuration() -> Configuration {
+        let volume = var("VOLUME")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1.0);
+        Configuration {
+            volume,
+        }
+    }
 
     pub fn play_sound() {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let file_path: String = super::take_args::get_path();
         let file = File::open(file_path).unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
-        let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+        let source = Decoder::new(BufReader::new(file)).unwrap();
+
+        let configuration = extract_configuration();
+
+        sink.set_volume(configuration.volume);
         sink.append(source);
         sink.sleep_until_end();
     }
