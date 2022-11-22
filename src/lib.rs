@@ -14,8 +14,6 @@ pub mod take_args {
     }
 }
 
-// TODO: Accept environment variables as options for volume control.
-
 pub mod playing_sound {
 
     use std::fs::File;
