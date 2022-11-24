@@ -1,10 +1,8 @@
-// TODO: Remove public keywords from functions that do not need to be public.
-
 pub mod take_args {
     use clap::Parser;
     #[derive(Parser)]
     pub struct Args {
-        /// The sound file to play.
+        /// The path to the sound file to play.
         #[arg(short, long)]
         path: String,
     }
@@ -16,10 +14,10 @@ pub mod take_args {
 
 pub mod playing_sound {
 
+    use rodio::{source::Source, Decoder, OutputStream, Sink};
+    use std::env::var;
     use std::fs::File;
     use std::io::BufReader;
-    use rodio::{Decoder, OutputStream, Sink, source::Source};
-    use std::env::var;
 
     struct Configuration {
         volume: f32,
@@ -30,9 +28,7 @@ pub mod playing_sound {
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(1.0);
-        Configuration {
-            volume,
-        }
+        Configuration { volume }
     }
 
     pub fn get_source() -> Decoder<BufReader<File>> {
