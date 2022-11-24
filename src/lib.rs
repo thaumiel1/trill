@@ -28,14 +28,16 @@ pub mod take_args {
         return search_glob.unwrap().flatten().collect();
     }
 
-    pub fn get_path() -> Vec<String> {
+    pub fn get_path() -> Vec<PathBuf> {
         let args = Args::parse();
-        let mut vec: Vec<String> = Vec::new();
+        let mut vec: Vec<PathBuf> = Vec::new();
+        let mut path = PathBuf::new();
+        path.push(args.path);
         if is_directory(&args.path) {
-            vec = get_all_files(PathBuf::from(args.path.to_string()))
+            vec = get_all_files(path);
             return vec;
         } else {
-            vec.push(args.path);
+            vec.push(path);
             return vec;
         }
     }
@@ -47,6 +49,7 @@ pub mod playing_sound {
     use std::env::var;
     use std::fs::File;
     use std::io::BufReader;
+    use std::path::PathBuf;
 
     struct Configuration {
         volume: f32,
@@ -60,8 +63,7 @@ pub mod playing_sound {
         Configuration { volume }
     }
 
-    pub fn get_source() -> Decoder<BufReader<File>> {
-        let file_path: String = super::take_args::get_path();
+    pub fn get_source(file_path: String) -> Decoder<BufReader<File>> {
         let file = File::open(file_path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
         source
@@ -72,14 +74,13 @@ pub mod playing_sound {
     }
 
     pub fn play_sound() {
+        let file_path: Vec<PathBuf> = super::take_args::get_path();
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-        let source = get_source();
         let sink = Sink::try_new(&stream_handle).unwrap();
         let configuration = extract_configuration();
 
-        // Sink initialisation and start.
         sink.set_volume(configuration.volume);
-        sink.append(source);
+        sink.append(get_source());
         sink.sleep_until_end();
     }
 }
