@@ -2,6 +2,7 @@ pub mod take_args {
     use clap::Parser;
     use std::fs::{FileType, ReadDir, metadata};
     use std::io::Result;
+    use std::path::PathBuf;
     use glob::glob;
 
 
@@ -22,23 +23,16 @@ pub mod take_args {
         }
     }
 
-    pub fn get_all_files(dir: String) -> Vec<String> {
-        let mut vec:Vec<String> = Vec::new();
-        let search_glob = glob(format!("{}/**/*.flac", dir).as_str());
-        for entry in search_glob {
-            match entry{
-                Ok() => vec.push(entry),
-                Err(E) => println!("error"),
-            }
-        }
-        vec
+    pub fn get_all_files(dir: PathBuf) -> Vec<PathBuf> {
+        let search_glob = glob(format!("{}/**/*.flac", dir.to_str().unwrap()).as_str());
+        return search_glob.unwrap().flatten().collect();
     }
 
     pub fn get_path() -> Vec<String> {
         let args = Args::parse();
         let mut vec: Vec<String> = Vec::new();
         if is_directory(&args.path) {
-
+            vec = get_all_files(PathBuf::from(args.path.to_string()))
             return vec;
         } else {
             vec.push(args.path);
