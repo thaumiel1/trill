@@ -24,7 +24,7 @@ pub mod take_args {
     }
 
     pub fn get_all_files(dir: PathBuf) -> Vec<PathBuf> {
-        let search_glob = glob(format!("{}/**/*.flac", dir.to_str().unwrap()).as_str());
+        let search_glob = glob(format!("{}/**/*.mp3", dir.to_str().unwrap()).as_str());
         return search_glob.unwrap().flatten().collect();
     }
 
