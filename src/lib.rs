@@ -1,14 +1,49 @@
 pub mod take_args {
     use clap::Parser;
+    use std::fs::{FileType, ReadDir, metadata};
+    use std::io::Result;
+    use glob::glob;
+
+
     #[derive(Parser)]
     pub struct Args {
         /// The path to the sound file to play.
         #[arg(short, long)]
         path: String,
     }
-    pub fn get_path() -> String {
+
+    pub fn is_directory(path: &String) -> bool {
+        let path = metadata(path);
+        let file_type = path.unwrap().file_type();
+        return if file_type.is_dir() {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn get_all_files(dir: String) -> Vec<String> {
+        let mut vec:Vec<String> = Vec::new();
+        let search_glob = glob(format!("{}/**/*.flac", dir).as_str());
+        for entry in search_glob {
+            match entry{
+                Ok() => vec.push(entry),
+                Err(E) => println!("error"),
+            }
+        }
+        vec
+    }
+
+    pub fn get_path() -> Vec<String> {
         let args = Args::parse();
-        args.path
+        let mut vec: Vec<String> = Vec::new();
+        if is_directory(&args.path) {
+
+            return vec;
+        } else {
+            vec.push(args.path);
+            return vec;
+        }
     }
 }
 
@@ -36,6 +71,10 @@ pub mod playing_sound {
         let file = File::open(file_path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
         source
+    }
+
+    pub fn add_to_sink(paths: Vec<String>, sink: &Sink) {
+
     }
 
     pub fn play_sound() {
