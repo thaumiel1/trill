@@ -32,7 +32,7 @@ pub mod take_args {
         let args = Args::parse();
         let mut vec: Vec<PathBuf> = Vec::new();
         let mut path = PathBuf::new();
-        path.push(args.path);
+        path.push(args.path.clone());
         if is_directory(&args.path) {
             vec = get_all_files(path);
             return vec;
@@ -63,14 +63,16 @@ pub mod playing_sound {
         Configuration { volume }
     }
 
-    pub fn get_source(file_path: String) -> Decoder<BufReader<File>> {
+    pub fn get_source(file_path: &PathBuf) -> Decoder<BufReader<File>> {
         let file = File::open(file_path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
         source
     }
 
-    pub fn add_to_sink(paths: Vec<String>, sink: &Sink) {
-
+    pub fn add_to_sink(paths: Vec<PathBuf>, sink: &Sink) {
+        for i in 0..paths.len() {
+            sink.append(get_source(&paths[i]))
+        }
     }
 
     pub fn play_sound() {
@@ -80,7 +82,7 @@ pub mod playing_sound {
         let configuration = extract_configuration();
 
         sink.set_volume(configuration.volume);
-        sink.append(get_source());
+        add_to_sink(file_path, &sink);
         sink.sleep_until_end();
     }
 }
