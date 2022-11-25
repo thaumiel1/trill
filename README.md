@@ -8,6 +8,10 @@ To just play a sound file:
 
 ```trill -p <path>```
 
+To randomise the order of tracks:
+
+```trill -r```
+
 ## Manipulating settings
 
 Settings are defined through environment variables.
