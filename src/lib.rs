@@ -1,9 +1,10 @@
 pub mod take_args {
     use clap::Parser;
-    use std::fs::{FileType, ReadDir, metadata};
+    use std::fs::{metadata};
     use std::io::Result;
     use std::path::PathBuf;
     use glob::glob;
+    use std::env::var;
 
 
     #[derive(Parser)]
@@ -14,6 +15,20 @@ pub mod take_args {
         /// If the imported tracks should be randomised.
         #[arg(short, long)]
         pub random: bool,
+    }
+
+    pub struct Configuration {
+        pub volume: f32,
+        pub is_random: bool,
+    }
+
+    pub fn extract_configuration() -> Configuration {
+        let volume = var("VOLUME")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1.0);
+        let is_random = get_args().random;
+        Configuration { volume, is_random }
     }
 
     pub fn is_directory(path: &String) -> bool {
@@ -53,26 +68,11 @@ pub mod take_args {
 pub mod playing_sound {
 
     use rodio::{source::Source, Decoder, OutputStream, Sink};
-    use std::env::var;
     use std::fs::File;
     use std::io::BufReader;
     use std::path::PathBuf;
     use rand::prelude::SliceRandom;
-    use super::take_args::get_args;
-
-    pub struct Configuration {
-        volume: f32,
-        is_random: bool,
-    }
-
-    pub fn extract_configuration() -> Configuration {
-        let volume = var("VOLUME")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(1.0);
-        let is_random = get_args().random;
-        Configuration { volume, is_random }
-    }
+    use super::take_args::{extract_configuration,Configuration};
 
     pub fn get_source(file_path: &PathBuf) -> Decoder<BufReader<File>> {
         let file = File::open(file_path).unwrap();
@@ -85,7 +85,6 @@ pub mod playing_sound {
             let mut rng = rand::thread_rng();
             paths.shuffle(&mut rng);
         }
-
         for i in 0..paths.len() {
             sink.append(get_source(&paths[i]))
         }
