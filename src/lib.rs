@@ -32,16 +32,15 @@ pub mod take_args {
     }
 
     pub fn get_path() -> Vec<PathBuf> {
-        let args = Args::parse();
+        let args = get_args();
         let mut vec: Vec<PathBuf> = Vec::new();
         let mut path = PathBuf::new();
         path.push(args.path.clone());
-        if is_directory(&args.path) {
-            vec = get_all_files(path);
-            return vec;
+        return if is_directory(&args.path) {
+            get_all_files(path)
         } else {
             vec.push(path);
-            return vec;
+            vec
         }
     }
 
@@ -61,16 +60,18 @@ pub mod playing_sound {
     use rand::prelude::SliceRandom;
     use super::take_args::get_args;
 
-    struct Configuration {
+    pub struct Configuration {
         volume: f32,
+        is_random: bool,
     }
 
-    fn extract_configuration() -> Configuration {
+    pub fn extract_configuration() -> Configuration {
         let volume = var("VOLUME")
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(1.0);
-        Configuration { volume }
+        let is_random = get_args().random;
+        Configuration { volume, is_random }
     }
 
     pub fn get_source(file_path: &PathBuf) -> Decoder<BufReader<File>> {
@@ -79,9 +80,8 @@ pub mod playing_sound {
         source
     }
 
-    pub fn add_to_sink(mut paths: Vec<PathBuf>, sink: &Sink) {
-        let args = get_args();
-        if args.random {
+    pub fn add_to_sink(config: Configuration, mut paths: Vec<PathBuf>, sink: &Sink) {
+        if config.is_random {
             let mut rng = rand::thread_rng();
             paths.shuffle(&mut rng);
         }
@@ -98,7 +98,7 @@ pub mod playing_sound {
         let configuration = extract_configuration();
 
         sink.set_volume(configuration.volume);
-        add_to_sink(file_path, &sink);
+        add_to_sink(configuration, file_path, &sink);
         sink.sleep_until_end();
     }
 }
