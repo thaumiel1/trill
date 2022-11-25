@@ -10,10 +10,10 @@ pub mod take_args {
     pub struct Args {
         /// The path to the sound file/directory to play.
         #[arg(short, long)]
-        path: String,
+        pub path: String,
         /// If the imported tracks should be randomised.
         #[arg(short, long)]
-        random: bool,
+        pub random: bool,
     }
 
     pub fn is_directory(path: &String) -> bool {
@@ -44,6 +44,11 @@ pub mod take_args {
             return vec;
         }
     }
+
+    pub fn get_args() -> Args {
+        let args = Args::parse();
+        args
+    }
 }
 
 pub mod playing_sound {
@@ -54,7 +59,7 @@ pub mod playing_sound {
     use std::io::BufReader;
     use std::path::PathBuf;
     use rand::prelude::SliceRandom;
-    use trill::take_args::Args;
+    use super::take_args::get_args;
 
     struct Configuration {
         volume: f32,
@@ -75,13 +80,12 @@ pub mod playing_sound {
     }
 
     pub fn add_to_sink(mut paths: Vec<PathBuf>, sink: &Sink) {
-        let args = Args::parse();
+        let args = get_args();
         if args.random {
             let mut rng = rand::thread_rng();
-            &paths.shuffle(&mut rng);
+            paths.shuffle(&mut rng);
         }
 
-        }
         for i in 0..paths.len() {
             sink.append(get_source(&paths[i]))
         }
