@@ -1,11 +1,9 @@
 pub mod take_args {
     use clap::Parser;
-    use std::fs::{metadata};
-    use std::io::Result;
-    use std::path::PathBuf;
     use glob::glob;
     use std::env::var;
-
+    use std::fs::metadata;
+    use std::path::PathBuf;
 
     #[derive(Parser)]
     pub struct Args {
@@ -34,11 +32,7 @@ pub mod take_args {
     pub fn is_directory(path: &String) -> bool {
         let path = metadata(path);
         let file_type = path.unwrap().file_type();
-        return if file_type.is_dir() {
-            true
-        } else {
-            false
-        }
+        return if file_type.is_dir() { true } else { false };
     }
 
     pub fn get_all_files(dir: PathBuf) -> Vec<PathBuf> {
@@ -56,7 +50,7 @@ pub mod take_args {
         } else {
             vec.push(path);
             vec
-        }
+        };
     }
 
     pub fn get_args() -> Args {
@@ -67,12 +61,12 @@ pub mod take_args {
 
 pub mod playing_sound {
 
-    use rodio::{source::Source, Decoder, OutputStream, Sink};
+    use super::take_args::{extract_configuration, Configuration};
+    use rand::prelude::SliceRandom;
+    use rodio::{Decoder, OutputStream, Sink};
     use std::fs::File;
     use std::io::BufReader;
     use std::path::PathBuf;
-    use rand::prelude::SliceRandom;
-    use super::take_args::{extract_configuration,Configuration};
 
     pub fn get_source(file_path: &PathBuf) -> Decoder<BufReader<File>> {
         let file = File::open(file_path).unwrap();
